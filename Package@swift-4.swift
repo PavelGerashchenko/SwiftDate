@@ -3,5 +3,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftDate"
+    name: "SwiftDate",
+    products: [
+        .library(name: "SwiftDate", type: .dynamic, targets: ["SwiftDate"])],
+    targets:[
+        .target(name: "SwiftDate")
+    ]
 )
