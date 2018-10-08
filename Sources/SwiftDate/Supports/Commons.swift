@@ -176,12 +176,6 @@ public struct DateFormats {
 // As always we would prefer using Foundation code rather than inventing code ourselves.
 extension Calendar {
 
-	typealias CFType = CFCalendar
-
-	private var _cfObject: CFType {
-		return unsafeBitCast(self as NSCalendar, to: CFCalendar.self)
-	}
-
 	/// Revised API for avoiding usage of AutoreleasingUnsafeMutablePointer.
 	/// The current exposed API in Foundation on Darwin platforms is:
 	/// `public func rangeOfUnit(unit: NSCalendarUnit, startDate datep:
@@ -201,61 +195,17 @@ extension Calendar {
 	///     near future
 	///
 	internal func rangex(of unit: Calendar.Component, for date: Date) -> (start: Date, duration: TimeInterval)? {
-		guard let cfValue = unit._cfValue else {
-			debugPrint("Passed unit '\(unit)' is not supported for operation")
-			return nil
-		}
-		var start: CFAbsoluteTime = 0.0
-		var ti: CFTimeInterval = 0.0
-		let res: Bool = withUnsafeMutablePointer(to: &start) { startp in
-			withUnsafeMutablePointer(to: &ti) { tip in
-				return CFCalendarGetTimeRangeOfUnit(_cfObject, cfValue, date.timeIntervalSinceReferenceDate, startp, tip)
-			}
-		}
-		if res {
-			return (Date(timeIntervalSinceReferenceDate: start), duration: ti)
-		}
+     
+        var startDate : Date = Date()
+        var interval : TimeInterval = 0
+
+        if self.dateInterval(of: unit, start: &startDate, interval: &interval, for: date) {
+            return (startDate,interval)
+        }
+        
 		return nil
 	}
 
-}
-
-public extension Calendar.Component {
-
-	// swiftlint:disable identifier_name
-	internal var _cfValue: CFCalendarUnit? {
-		guard let value = self.cfCalendarUnit else { return nil }
-		#if os(macOS) || os(iOS)
-		return CFCalendarUnit(rawValue: value)
-		#else
-		return CFCalendarUnit(rawValue: value)
-		#endif
-	}
-
-	internal static func toSet(_ src: [Calendar.Component]) -> Set<Calendar.Component> {
-		var l: Set<Calendar.Component> = []
-		src.forEach { l.insert($0) }
-		return l
-	}
-
-	internal var cfCalendarUnit: UInt? {
-		switch self {
-		case .day:				return CFCalendarUnit.day.rawValue
-		case .era:				return CFCalendarUnit.era.rawValue
-		case .year:				return CFCalendarUnit.year.rawValue
-		case .month:			return CFCalendarUnit.month.rawValue
-		case .hour:				return CFCalendarUnit.hour.rawValue
-		case .minute:			return CFCalendarUnit.minute.rawValue
-		case .second:			return CFCalendarUnit.second.rawValue
-		case .weekday:			return CFCalendarUnit.weekday.rawValue
-		case .weekdayOrdinal:	return CFCalendarUnit.weekdayOrdinal.rawValue
-		case .quarter:			return CFCalendarUnit.quarter.rawValue
-		case .weekOfMonth:		return CFCalendarUnit.weekOfMonth.rawValue
-		case .weekOfYear:		return CFCalendarUnit.weekOfYear.rawValue
-		case .yearForWeekOfYear:return CFCalendarUnit.yearForWeekOfYear.rawValue
-		default:				return nil // nanoseconds, calendar and timezone are not supported
-		}
-	}
 }
 
 /// This define the weekdays for some functions.
