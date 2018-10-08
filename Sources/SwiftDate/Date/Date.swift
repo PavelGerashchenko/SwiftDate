@@ -27,11 +27,10 @@ extension Date: DateRepresentable {
 	/// optimize the formatting process. By default is `nil`.
 	public var customFormatter: DateFormatter? {
 		get {
-			let fomatter: DateFormatter? = getAssociatedValue(key: AssociatedKeys.customDateFormatter.rawValue, object: self as AnyObject)
-			return fomatter
+			return nil
 		}
 		set {
-			set(associatedValue: newValue, key: AssociatedKeys.customDateFormatter.rawValue, object: self as AnyObject)
+			return
 		}
 	}
 
