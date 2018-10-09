@@ -8,6 +8,14 @@
 
 import Foundation
 
+internal func arc4random_uniform(_ max: UInt32) -> UInt32 {
+    #if os(Linux)
+        return UInt32.random(in: 0...max)
+    #else
+        return arc4random_uniform(max)
+    #endif
+}
+
 public extension DateInRegion {
 
 	// MARK: - Random Date Generator
